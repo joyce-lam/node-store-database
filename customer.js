@@ -25,7 +25,20 @@ function action() {
 		type: "input",
 		message: "How many would you like?"
 	}).then(function(response) {
-		response.choice
-		response.quantityInput
+		var currentStock = findCurrentStock(response.choice);
+		if (response.quantityInput > currentStock) {
+			updateStock();
+		} else {
+			console.log("Insufficient stock to allow transactions! Try again!")
+		}
 	})
+}
+
+
+function findCurrentStock(id) {
+	var query = "SELECT stock_quantity FROM products WHERE ?";
+	connection.query(query, {item_id: id}, function(err, res) {
+		if (err) throw err;
+		console.log(res);
+	});
 }
