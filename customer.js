@@ -14,3 +14,18 @@ connection.connect(function(err) {
 	action();
 });
 
+function action() {
+	inquirer.prompt({
+		name: "choice",
+		type: "input",
+		message: "Hi! What is the ID of the item you would like to buy today?"
+	},
+	{
+		name: "quantityInput",
+		type: "input",
+		message: "How many would you like?"
+	}).then(function(response) {
+		response.choice
+		response.quantityInput
+	})
+}
