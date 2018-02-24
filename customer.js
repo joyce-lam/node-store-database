@@ -63,6 +63,7 @@ function action() {
 	}).then(function(response) {
 		if (response.choice === "q") {
 			console.log("See you next time!");
+			return;
 		} else {
 			askQuantity();
 			purchase["choice"] = response.choice;
@@ -115,14 +116,14 @@ function findCurrentStock(id) {
 
 function compareStock(choice, quantity, stock) {
 	if (quantity <= stock) {
-			calculateAmount(choice, quantity);
+			calculateAmount(choice, quantity, stock);
 	} else {
 		console.log("Insufficient stock to allow transactions! Try again!")
 	}
 
 }
 
-function calculateAmount(id, quantity) {
+function calculateAmount(id, quantity, stock) {
 	var query = "SELECT price_per_unit FROM products WHERE ?";
 	connection.query(query, 
 	{
@@ -133,7 +134,9 @@ function calculateAmount(id, quantity) {
 		//console.log(unitPrice);
 		var total = unitPrice * quantity;
 		console.log("Total Price: " + total);
-		updateStock(quantity, id);
+
+		var quantityAfterPurchase = parseInt(stock) - parseInt(quantity);
+		updateStock(quantityAfterPurchase, id);
 		return total;
 	})
 }
