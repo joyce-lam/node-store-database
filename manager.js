@@ -24,7 +24,7 @@ function action() {
 		type: "list",
 		message: "Please choose:\n",
 		choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", 
-		"Add New Product"]
+		"Add New Product", "q to quit"]
 	}).then(function(response) {
 		var choice = response.choice;
 		switch (choice) {
@@ -39,6 +39,9 @@ function action() {
 
 			case "Add New Product":
 				return addProductName();
+
+			case "q to quit":
+			process.exit(0);
 		}
 	})
 }
@@ -88,22 +91,28 @@ function displayLowInventory() {
 	connection.query(query, function(err, res) {
 		if (err) throw err;
 
-		table.push(["item_id", "product_name", "department", "price_per_unit", "stock_quantity"]);
+		if (res.length === 0) {
+			console.log("Nothing is short.");
+			action();
+		} else {
 
-		res.forEach(function(product) {
-			table.push([
-				product.item_id,
-				product.product_name,
-				product.department_name,
-				product.price_per_unit,
-				product.stock_quantity
-			]);
-		})
+			table.push(["item_id", "product_name", "department", "price_per_unit", "stock_quantity"]);
 
-		console.log(table.toString());
+			res.forEach(function(product) {
+				table.push([
+					product.item_id,
+					product.product_name,
+					product.department_name,
+					product.price_per_unit,
+					product.stock_quantity
+				]);
+			})
 
-		//call inquirer function
-		action();
+			console.log(table.toString());
+
+			//call inquirer function
+			action();
+		}
 
 	});
 }
@@ -117,7 +126,7 @@ function addInventory() {
 		validate: validateNumString
 	}).then(function(response) {
 		if (response.addInv === "q") {
-			return;
+			process.exit(0);
 		} else {
 
 			findCurrentStock(response.addInv);
@@ -156,7 +165,7 @@ function askQuantity(currentStock) {
 		validate: validateNumString
 	}).then(function(response) {
 		if (response.quantityInput === "q") {
-			action();
+			process.exit(0);
 		} else {
 			var totalQuantity = parseInt(response.quantityInput) + parseInt(currentStock);
 			console.log("The total stock_quantity will be: " + totalQuantity);
@@ -193,7 +202,7 @@ function addProductName() {
 		validate: validateNumString
 	}).then(function(response) {
 		if (response.nameproduct === "q") {
-			return;
+			process.exit(0);
 		} else {
 			newProduct["name"] = response.nameproduct;
 			addProductDept();
@@ -210,7 +219,7 @@ function addProductDept() {
 		validate: validateNumString
 	}).then(function(response) {
 		if (response.dept === "q") {
-			return;
+			process.exit(0);
 		} else {
 			newProduct["dept"] = response.dept;
 			addProductPrice();
@@ -227,7 +236,7 @@ function askProductPrice() {
 		validate: validateNumString
 	}).then(function(response) {
 		if (response.unitprice === "q") {
-			return;
+			process.exit(0);
 		} else {
 			newProduct["unitprice"] = response.unitprice;
 			addProductStock();

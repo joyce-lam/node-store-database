@@ -63,7 +63,7 @@ function action() {
 	}).then(function(response) {
 		if (response.choice === "q") {
 			console.log("See you next time!");
-			return;
+			process.exit(0);
 		} else {
 			askQuantity();
 			purchase["choice"] = response.choice;
