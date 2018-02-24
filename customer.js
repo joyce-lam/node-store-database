@@ -1,7 +1,9 @@
+//require npm package
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 var Table = require("cli-table");
 
+//create connection to mysql database
 var connection = mysql.createConnection({
 	host: "localhost",
 	port: 3306,
@@ -10,14 +12,13 @@ var connection = mysql.createConnection({
 	database: "inventoryDB"
 });
 
-
+//connect to database
 connection.connect(function(err) {
 	if (err) throw err;
 	showTable();
-	action();
 });
 
-
+//render table using cli-table package to show data from mysql database
 function showTable() {
 	var table = new Table({
 	  chars: { 'top': '═' , 'top-mid': '╤' , 'top-left': '╔' , 'top-right': '╗'
@@ -32,45 +33,56 @@ function showTable() {
 
 		table.push(["item_id", "product_name", "department", "price_per_unit", "stock_quantity"]);
 
-		for (var i = 0; i < res.length; i++) {
-			table.push([res[i].item_id, res[i].product_name, res[i].department_name, res[i].price_per_unit, res[i].stock_quantity]);
-		}
+		res.forEach(function(product) {
+			table.push([
+				product.item_id,
+				product.product_name,
+				product.department_name,
+				product.price_per_unit,
+				product.stock_quantity
+			]);
+		})
 
-	console.log(table.toString());
+		console.log(table.toString());
+		
+		//call inquirer function
+		action();
 
-	})
-
+	});
 }
 
 
-// // 	var a = res.forEach(function(product) {
-// // 				product.item_id;
-// // 				product.product_name;
-// // 				product.department_name;
-// // 				product.price_per_unit;
-// // 				product.stock_quantity
-// // 			});
-
-
-
 var purchase = {};
+//function to ask questions
 function action() {
-
 	inquirer.prompt({
 		name: "choice",
 		type: "input",
-		message: "Hi! Let's shop! What is the ID of the item you would like to buy today?[q to quit]\n"
+		message: "Hi! Let's shop! What is the ID of the item you would like to buy today?[q to quit]\n",
+		validate: validateNumString
 	}).then(function(response) {
 		if (response.choice === "q") {
 			console.log("See you next time!");
 		} else {
 			askQuantity();
 			purchase["choice"] = response.choice;
-			//findCurrentStock(response.choice);
 		}
 	})
 }
-	
+
+
+
+function validateNumString(input) {
+   if (typeof parseInt(input) === "number"){
+   		return true;
+   	} else if (input === "q" || input === "Q"){
+   		return true;
+   	} else {
+   		console.log("Enter a valid number or quit")
+   		return;
+   	}
+}
+
 
 function askQuantity() {
 	inquirer.prompt({
@@ -82,13 +94,6 @@ function askQuantity() {
 		purchase["quantity"] = response.quantityInput;
 
 		findCurrentStock(purchase.choice);
-
-		
-		// if (response.quantityInput < currentStock) {
-		// 	updateStock(response.quantityInput, response.choice);
-		// } else {
-		// 	console.log("Insufficient stock to allow transactions! Try again!")
-		// }
 	});
 }
 
@@ -109,10 +114,8 @@ function findCurrentStock(id) {
 
 
 function compareStock(choice, quantity, stock) {
-	if (quantity < stock) {
-			console.log("Processing transactions.");
-			calculateAmount()
-			//updateStock(quantity, choice);
+	if (quantity <= stock) {
+			calculateAmount(choice, quantity);
 	} else {
 		console.log("Insufficient stock to allow transactions! Try again!")
 	}
@@ -127,8 +130,10 @@ function calculateAmount(id, quantity) {
 	}, function(err, res) {
 		if (err) throw err;
 		var unitPrice = res[0].price_per_unit;
+		//console.log(unitPrice);
 		var total = unitPrice * quantity;
-		console.log("Total: " + total);
+		console.log("Total Price: " + total);
+		updateStock(quantity, id);
 		return total;
 	})
 }
@@ -144,10 +149,12 @@ function updateStock(quantity, id) {
 			item_id: id
 		}], function(err, res) {
 			if (err) throw err;
-			console.log(res)
+			//console.log(res)
+			console.log("Now we have: ");
+			showTable();
 		}
 	);
-	action();
 }
+
 
 
