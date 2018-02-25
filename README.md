@@ -12,6 +12,7 @@ In order to run this store, you need to install the following Node packages.
 1. In terminal, go to your project and run `npm init --y` which can initialize a `package.json` file for your project.
 
 2. Make 2 sql files.
+
 (1) schema.sql
 This file contains the database and table for holding data about the store inventory.
 
@@ -19,6 +20,7 @@ This file contains the database and table for holding data about the store inven
 This file contains the data(items) for the store inventory.
 
 3. Make 2 javascript files.
+
 (1) customer.js
 * This file contains the logic for customer view.
 * Customers will be shown the product table with items and corresponding data which are stored in the mysql database. Then, they will be prompted to select the product and the quantity of the product they would like to purchase. The data in database will be updated and results are shown in a table.
