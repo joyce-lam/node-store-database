@@ -76,7 +76,7 @@ function action() {
 function validateNumString(input) {
    if (typeof parseInt(input) === "number"){
    		return true;
-   	} else if (input === "q" || input === "Q"){
+   	} else if (input === "q"){
    		return true;
    	} else {
    		console.log("Enter a valid number or quit")
