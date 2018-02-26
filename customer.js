@@ -61,18 +61,20 @@ function action() {
 		message: "Hi! Let's shop! What is the ID of the item you would like to buy today?[q to quit]\n",
 		validate: validateNumString
 	}).then(function(response) {
+		//if user clicks q, they can quit the app
 		if (response.choice === "q") {
 			console.log("See you next time!");
 			process.exit(0);
 		} else {
+			//otherwise, they will be prompted to answer the next question
 			askQuantity();
+			//saving user's choice in an object
 			purchase["choice"] = response.choice;
 		}
 	})
 }
 
-
-
+//validate user input
 function validateNumString(input) {
    if (typeof parseInt(input) === "number"){
    		return true;
@@ -84,21 +86,22 @@ function validateNumString(input) {
    	}
 }
 
-
+//function to ask user to input quantity using inquirer
 function askQuantity() {
 	inquirer.prompt({
 		name: "quantityInput",
 		type: "input",
 		message: "How many would you like?"
 	}).then(function(response) {
-		console.log(response.quantityInput);
+		//saving user's input in an object
 		purchase["quantity"] = response.quantityInput;
-
+		//call the next function to find the available stock
 		findCurrentStock(purchase.choice);
+		return response.quantityInput;
 	});
 }
 
-
+//function to find available stock by reaching to sql database
 function findCurrentStock(id) {
 	var query = "SELECT stock_quantity FROM products WHERE ?";
 	connection.query(query, 
@@ -106,23 +109,25 @@ function findCurrentStock(id) {
 			item_id: id
 		}, function(err, res) {
 		if (err) throw err;
-		console.log("Current stock: " + res[0].stock_quantity);
+		//call the next function to compare the available stock and user's input
 		var currentStock = res[0].stock_quantity;
 		compareStock(purchase.choice, purchase.quantity, currentStock);
 		return res[0].stock_quantity;
 	});
 }
 
-
+//function to compare the available stock and user's input
 function compareStock(choice, quantity, stock) {
 	if (quantity <= stock) {
-			calculateAmount(choice, quantity, stock);
+		//call the next function to calculate the amount the user has to pay
+		calculateAmount(choice, quantity, stock);
 	} else {
 		console.log("Insufficient stock to allow transactions! Try again!")
 	}
 
 }
 
+//function to calculate the amount user has to pay
 function calculateAmount(id, quantity, stock) {
 	var query = "SELECT price_per_unit FROM products WHERE ?";
 	connection.query(query, 
@@ -131,17 +136,18 @@ function calculateAmount(id, quantity, stock) {
 	}, function(err, res) {
 		if (err) throw err;
 		var unitPrice = res[0].price_per_unit;
-		//console.log(unitPrice);
+		//calculate the total price
 		var total = unitPrice * quantity;
 		console.log("Total Price: " + total);
 
 		var quantityAfterPurchase = parseInt(stock) - parseInt(quantity);
+		//call the function to update sql database
 		updateStock(quantityAfterPurchase, id);
 		return total;
 	})
 }
 
-
+//function to update sql database
 function updateStock(quantity, id) {
 	var query = "UPDATE products SET ? WHERE?";
 	connection.query(query, 
@@ -152,12 +158,11 @@ function updateStock(quantity, id) {
 			item_id: id
 		}], function(err, res) {
 			if (err) throw err;
-			//console.log(res)
+			
 			console.log("Now we have: ");
+			//call the function to show the items available in the store
 			showTable();
 		}
 	);
 }
-
-
 

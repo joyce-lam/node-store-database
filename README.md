@@ -32,6 +32,8 @@ This file contains the data(items) for the store inventory.
 * This file contains the logic for manager view.
 * Managers can select to view/update/add products. Data will be pulled from the mysql database.
 
+![alt text](https://github.com/joyce-lam/node-store-database/blob/master/assets/manager.gif)
+
 ## Built With
 * Node.js
 * Npm Inquirer.js
